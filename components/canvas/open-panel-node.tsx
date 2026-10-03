@@ -10,8 +10,10 @@ export interface OpenPanelNodeData {
   isDimmed: boolean;
   selectedFileId: string | null;
   activeFileIds: Set<string>;
+  hoveredFileId?: string | null;
   onClose: (nodeId: string) => void;
   onSelectFile: (fileId: string) => void;
+  onHoverFile?: (fileId: string | null) => void;
 }
 
 export function OpenPanelNodeComponent({ data }: { data: OpenPanelNodeData }) {
@@ -20,8 +22,10 @@ export function OpenPanelNodeComponent({ data }: { data: OpenPanelNodeData }) {
     isDimmed,
     selectedFileId,
     activeFileIds,
+    hoveredFileId,
     onClose,
     onSelectFile,
+    onHoverFile,
   } = data;
 
   const visibleFiles = node.files.slice(0, MAX_PANEL_FILES);
@@ -84,12 +88,16 @@ export function OpenPanelNodeComponent({ data }: { data: OpenPanelNodeData }) {
         {visibleFiles.map((file) => {
           const isSelected = selectedFileId === file.id;
           const isActive = activeFileIds.has(file.id);
+          const isHovered = hoveredFileId === file.id;
 
           let rowBg = 'hover:bg-surface-raised/60';
           let textColor = 'text-foreground';
 
           if (isSelected) {
             rowBg = 'bg-accent/15';
+            textColor = 'text-accent font-medium';
+          } else if (isHovered) {
+            rowBg = 'bg-accent/20 ring-1 ring-accent';
             textColor = 'text-accent font-medium';
           } else if (selectedFileId && !isActive) {
             textColor = 'text-foreground-muted opacity-40';
@@ -102,6 +110,8 @@ export function OpenPanelNodeComponent({ data }: { data: OpenPanelNodeData }) {
                 e.stopPropagation();
                 onSelectFile(file.id);
               }}
+              onMouseEnter={() => onHoverFile?.(file.id)}
+              onMouseLeave={() => onHoverFile?.(null)}
               className={`relative flex items-center justify-between px-2.5 py-1 text-xs transition-colors cursor-pointer group/row ${rowBg} ${textColor}`}
               title={`${file.path}\nFan-in: ${file.fanIn} | Fan-out: ${file.fanOut}`}
             >

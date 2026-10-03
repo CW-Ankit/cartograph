@@ -9,12 +9,14 @@ export interface FoldedNodeData {
   isDimmed: boolean;
   isSelected: boolean;
   isConnected: boolean;
+  isHovered?: boolean;
   onOpen: (nodeId: string) => void;
   onSelect: (nodeId: string) => void;
+  onHover?: (target: { type: 'node'; id: string } | null) => void;
 }
 
 export function FoldedNodeComponent({ data }: { data: FoldedNodeData }) {
-  const { node, isDimmed, isSelected, isConnected, onOpen, onSelect } = data;
+  const { node, isDimmed, isSelected, isConnected, isHovered, onOpen, onSelect, onHover } = data;
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -34,6 +36,9 @@ export function FoldedNodeComponent({ data }: { data: FoldedNodeData }) {
   if (isSelected) {
     borderClass = 'border-accent ring-1 ring-accent';
     bgClass = 'bg-surface-raised';
+  } else if (isHovered) {
+    borderClass = 'border-accent ring-1 ring-accent/70';
+    bgClass = 'bg-surface-raised';
   } else if (isConnected) {
     borderClass = 'border-border hover:border-accent/70';
     bgClass = 'bg-surface hover:bg-surface-raised';
@@ -48,6 +53,8 @@ export function FoldedNodeComponent({ data }: { data: FoldedNodeData }) {
     <div
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
+      onMouseEnter={() => onHover?.({ type: 'node', id: node.id })}
+      onMouseLeave={() => onHover?.(null)}
       style={{ width: `${node.width}px`, height: `${node.height}px` }}
       className={`relative flex flex-col justify-between rounded-[4px] border ${borderClass} ${bgClass} ${textClass} ${opacityClass} p-2 font-mono transition-all duration-100 cursor-pointer select-none group`}
       title={`${node.path}\n${node.files.length} files\nFan-in: ${node.fanIn}, Fan-out: ${node.fanOut}\nDouble-click to expand into panel`}

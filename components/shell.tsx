@@ -7,7 +7,7 @@ import { InviteModal } from './invite-modal';
 import { Dashboard } from './dashboard';
 import { LeftRail } from './canvas/left-rail';
 import { GraphCanvas } from './canvas/graph-canvas';
-import { RightPane } from './canvas/right-pane';
+import { RightPane, type CanvasSelectionTarget, type CanvasHoverTarget } from './canvas/right-pane';
 import { deriveFileCategories } from '@/lib/graph/categories';
 import type { DbAnalysis } from '@/types/database';
 import type { ParseResult } from '@/lib/parser/types';
@@ -25,6 +25,7 @@ export interface ShellProps {
   parseResult?: ParseResult;
   view?: 'dashboard' | 'map';
   isScaffoldPreview?: boolean;
+  repositoryName?: string;
 }
 
 export function Shell({
@@ -33,7 +34,12 @@ export function Shell({
   parseResult,
   view = 'dashboard',
   isScaffoldPreview = false,
+  repositoryName,
 }: ShellProps) {
+  // State for canvas selection and bidirectional hover
+  const [selectedTarget, setSelectedTarget] = React.useState<CanvasSelectionTarget>(null);
+  const [hoveredTarget, setHoveredTarget] = React.useState<CanvasHoverTarget>(null);
+
   // Derive file categories for the left rail when map is active
   const categories = useMemo(() => {
     return parseResult ? deriveFileCategories(parseResult.files) : [];
@@ -123,11 +129,24 @@ export function Shell({
 
           {/* Column 2: Map Canvas (Middle) */}
           <div className="relative flex-1 overflow-hidden bg-background">
-            <GraphCanvas parseResult={parseResult} />
+            <GraphCanvas
+              parseResult={parseResult}
+              selectedTarget={selectedTarget}
+              onSelectTarget={setSelectedTarget}
+              hoveredTarget={hoveredTarget}
+              onHoverTarget={setHoveredTarget}
+            />
           </div>
 
-          {/* Column 3: Detail Pane (Right, empty column settled for future phases) */}
-          <RightPane />
+          {/* Column 3: Detail Pane (Right) */}
+          <RightPane
+            parseResult={parseResult}
+            repositoryName={repositoryName ?? (isScaffoldPreview ? 'trpc/packages' : undefined)}
+            selectedTarget={selectedTarget}
+            onSelectTarget={setSelectedTarget}
+            hoveredTarget={hoveredTarget}
+            onHoverTarget={setHoveredTarget}
+          />
         </main>
       ) : (
         <main className="flex flex-1 overflow-hidden">
