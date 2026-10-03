@@ -1,9 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import type { FoldedNode } from '@/lib/graph/folding';
-import { MAX_PANEL_FILES, PANEL_WIDTH } from '@/lib/graph/layout';
+import { PANEL_WIDTH } from '@/lib/graph/layout';
 
 export interface OpenPanelNodeData {
   node: FoldedNode;
@@ -28,8 +28,15 @@ export function OpenPanelNodeComponent({ data }: { data: OpenPanelNodeData }) {
     onHoverFile,
   } = data;
 
-  const visibleFiles = node.files.slice(0, MAX_PANEL_FILES);
-  const overflowCount = node.files.length - visibleFiles.length;
+  const selectedRowRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to selected file inside the panel if selected
+  useEffect(() => {
+    if (selectedFileId && selectedRowRef.current) {
+      selectedRowRef.current.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }, [selectedFileId]);
+
   const opacityClass = isDimmed ? 'opacity-20' : 'opacity-100';
 
   return (
@@ -37,27 +44,27 @@ export function OpenPanelNodeComponent({ data }: { data: OpenPanelNodeData }) {
       style={{ width: `${Math.max(PANEL_WIDTH, node.width + 40)}px` }}
       className={`relative flex flex-col rounded-[4px] border border-border bg-surface text-foreground ${opacityClass} shadow-none overflow-hidden select-none font-mono transition-opacity duration-100`}
     >
-      {/* Default fallback handles */}
+      {/* Node level fallback handles */}
       <Handle
         type="target"
         id={`${node.id}-target`}
         position={Position.Left}
-        className="!w-1.5 !h-1.5 !-left-1 !top-4 !bg-border !border-0"
+        className="!w-2 !h-2 !-left-1 !top-4 !bg-border !border-0"
       />
       <Handle
         type="source"
         id={`${node.id}-source`}
         position={Position.Right}
-        className="!w-1.5 !h-1.5 !-right-1 !top-4 !bg-border !border-0"
+        className="!w-2 !h-2 !-right-1 !top-4 !bg-border !border-0"
       />
 
-      {/* Header: Click closes back to a single node */}
+      {/* Header: Click closes back to a single folded node */}
       <div
         onClick={(e) => {
           e.stopPropagation();
           onClose(node.id);
         }}
-        className="flex items-center justify-between border-b border-border bg-surface-raised px-2.5 py-1.5 cursor-pointer hover:bg-surface-raised/80 transition-colors"
+        className="flex items-center justify-between border-b border-border bg-surface-raised px-2.5 py-1.5 cursor-pointer hover:bg-surface-raised/80 transition-colors shrink-0"
         title="Click header to close folder"
       >
         <div className="flex items-center gap-1.5 min-w-0">
@@ -83,9 +90,9 @@ export function OpenPanelNodeComponent({ data }: { data: OpenPanelNodeData }) {
         </div>
       </div>
 
-      {/* File Rows */}
-      <div className="flex flex-col divide-y divide-border-subtle bg-surface">
-        {visibleFiles.map((file) => {
+      {/* Scrollable File Rows Container (nowheel class prevents zooming canvas when scrolling files) */}
+      <div className="flex flex-col divide-y divide-border-subtle bg-surface max-h-[312px] overflow-y-auto nowheel">
+        {node.files.map((file) => {
           const isSelected = selectedFileId === file.id;
           const isActive = activeFileIds.has(file.id);
           const isHovered = hoveredFileId === file.id;
@@ -106,13 +113,14 @@ export function OpenPanelNodeComponent({ data }: { data: OpenPanelNodeData }) {
           return (
             <div
               key={file.id}
+              ref={isSelected ? selectedRowRef : undefined}
               onClick={(e) => {
                 e.stopPropagation();
                 onSelectFile(file.id);
               }}
               onMouseEnter={() => onHoverFile?.(file.id)}
               onMouseLeave={() => onHoverFile?.(null)}
-              className={`relative flex items-center justify-between px-2.5 py-1 text-xs transition-colors cursor-pointer group/row ${rowBg} ${textColor}`}
+              className={`relative flex items-center justify-between px-2.5 py-1 text-xs transition-colors cursor-pointer group/row ${rowBg} ${textColor} shrink-0`}
               title={`${file.path}\nFan-in: ${file.fanIn} | Fan-out: ${file.fanOut}`}
             >
               {/* Target handle on Left of each row */}
@@ -142,13 +150,6 @@ export function OpenPanelNodeComponent({ data }: { data: OpenPanelNodeData }) {
           );
         })}
       </div>
-
-      {/* Overflow indicator when rows exceed limit */}
-      {overflowCount > 0 && (
-        <div className="border-t border-border-subtle bg-surface-raised/30 px-2.5 py-1 text-[10px] text-foreground-muted">
-          + {overflowCount} more files
-        </div>
-      )}
     </div>
   );
 }

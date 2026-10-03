@@ -1,16 +1,15 @@
 import dagre from 'dagre';
 import type { FoldedNode, DerivedGraphEdge } from './folding';
 
-export const MAX_PANEL_FILES = 10;
-export const PANEL_WIDTH = 280;
+export const MAX_VISIBLE_PANEL_FILES = 12;
+export const MAX_PANEL_FILES = MAX_VISIBLE_PANEL_FILES;
+export const PANEL_WIDTH = 290;
 export const ROW_HEIGHT = 26;
 export const HEADER_HEIGHT = 38;
-export const OVERFLOW_HEIGHT = 26;
 
 export function getOpenPanelDimensions(fileCount: number, labelWidth: number): { width: number; height: number } {
-  const visibleRows = Math.min(fileCount, MAX_PANEL_FILES);
-  const hasOverflow = fileCount > MAX_PANEL_FILES;
-  const height = HEADER_HEIGHT + visibleRows * ROW_HEIGHT + (hasOverflow ? OVERFLOW_HEIGHT : 0) + 8;
+  const visibleRows = Math.min(Math.max(fileCount, 2), MAX_VISIBLE_PANEL_FILES);
+  const height = HEADER_HEIGHT + visibleRows * ROW_HEIGHT + 8;
   const width = Math.max(PANEL_WIDTH, labelWidth + 40);
   return { width, height };
 }
