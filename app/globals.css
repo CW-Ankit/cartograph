@@ -1,26 +1,194 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --surface-raised: #f1f5f9;
+  --border: #e2e8f0;
+  --border-subtle: #f1f5f9;
+  --foreground: #09090b;
+  --foreground-muted: #64748b;
+  --accent: #2563eb;
+  --accent-foreground: #ffffff;
+  --incoming: #16a34a;
+  --outgoing: #d97706;
+}
+
+html.dark {
+  color-scheme: dark;
+  --background: #09090b;
+  --surface: #111114;
+  --surface-raised: #18181c;
+  --border: #222227;
+  --border-subtle: #19191d;
+  --foreground: #f4f4f6;
+  --foreground-muted: #8e8e99;
+  --accent: #3b82f6;
+  --accent-foreground: #ffffff;
+  --incoming: #22c55e;
+  --outgoing: #f59e0b;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
   --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-incoming: var(--incoming);
+  --color-outgoing: var(--outgoing);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  letter-spacing: -0.01em;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Dense monospace for file paths and identifiers */
+.font-mono, code, pre, kbd {
+  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* Subtle engineering graph grid texture (delta.dev inspired) */
+.bg-grid-pattern {
+  background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* =========================================================================
+   Clerk Component Theme & Styling (Delta-inspired Developer Aesthetic)
+   ========================================================================= */
+
+.cl-rootBox {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-geist-mono), monospace;
+}
+
+/* Organization Switcher Trigger Button */
+.cl-organizationSwitcherTrigger {
+  height: 28px !important;
+  padding: 0 8px !important;
+  background-color: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 4px !important;
+  color: var(--foreground) !important;
+  font-family: var(--font-geist-mono), monospace !important;
+  font-size: 11px !important;
+  letter-spacing: -0.01em !important;
+  box-shadow: none !important;
+  transition: all 120ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.cl-organizationSwitcherTrigger:hover {
+  background-color: var(--surface-raised) !important;
+  border-color: var(--accent) !important;
+}
+
+.cl-organizationSwitcherTrigger:focus,
+.cl-organizationSwitcherTrigger:focus-visible {
+  outline: none !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 1px var(--accent) !important;
+}
+
+.cl-organizationSwitcherTrigger *,
+.cl-organizationPreview,
+.cl-organizationPreviewTextContainer,
+.cl-organizationPreviewMainIdentifier {
+  color: var(--foreground) !important;
+  font-family: var(--font-geist-mono), monospace !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+}
+
+.cl-organizationPreviewAvatarBox {
+  width: 16px !important;
+  height: 16px !important;
+  border-radius: 3px !important;
+  border: 1px solid var(--border) !important;
+  overflow: hidden !important;
+}
+
+.cl-organizationPreviewSecondaryIdentifier,
+.cl-organizationSwitcherTriggerIcon {
+  color: var(--foreground-muted) !important;
+  opacity: 0.8;
+}
+
+/* User Button */
+.cl-userButtonTrigger {
+  border-radius: 4px !important;
+  border: 1px solid var(--border) !important;
+  padding: 2px !important;
+  background-color: var(--surface) !important;
+  transition: all 120ms ease !important;
+}
+
+.cl-userButtonTrigger:hover {
+  border-color: var(--accent) !important;
+  background-color: var(--surface-raised) !important;
+}
+
+.cl-userButtonAvatarBox {
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 3px !important;
+}
+
+/* Clerk Popovers & Dropdown Menus */
+.cl-organizationSwitcherPopoverCard,
+.cl-userButtonPopoverCard {
+  background-color: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 6px !important;
+  color: var(--foreground) !important;
+  font-family: var(--font-geist-mono), monospace !important;
+  font-size: 12px !important;
+  box-shadow: 0 12px 30px -4px rgb(0 0 0 / 0.35), 0 4px 10px -2px rgb(0 0 0 / 0.2) !important;
+  padding: 6px !important;
+}
+
+.cl-organizationSwitcherPopoverActions,
+.cl-userButtonPopoverActions,
+.cl-organizationSwitcherPopoverFooter,
+.cl-userButtonPopoverFooter {
+  border-color: var(--border) !important;
+  padding-top: 6px !important;
+  margin-top: 6px !important;
+}
+
+.cl-organizationSwitcherPopoverActionButton,
+.cl-userButtonPopoverActionButton,
+.cl-userPreviewMainIdentifier,
+.cl-userButtonPopoverActionButtonText {
+  color: var(--foreground) !important;
+  font-family: var(--font-geist-mono), monospace !important;
+  font-size: 11px !important;
+  border-radius: 4px !important;
+  transition: background-color 100ms ease !important;
+}
+
+.cl-organizationSwitcherPopoverActionButton:hover,
+.cl-userButtonPopoverActionButton:hover {
+  background-color: var(--surface-raised) !important;
+  color: var(--foreground) !important;
+}
+
+.cl-userPreviewSecondaryIdentifier {
+  color: var(--foreground-muted) !important;
 }

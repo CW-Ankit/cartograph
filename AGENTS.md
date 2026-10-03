@@ -25,6 +25,8 @@ Spec driven. Nothing gets built without a spec.
   the part you need. Don't ask me to paste it.
 - `docs/specs/phase-NN.md` — one per phase, written just before it starts.
   Behaviour and an acceptance check, never filenames.
+- `DESIGN.md` — visual design system and delta.dev styling patterns for
+  Cartograph. Read on every UI task.
 - This file — always true, read on every prompt.
 
 **Starting a phase.** Read this file and that phase's spec. Build what the spec
@@ -95,7 +97,7 @@ One obvious way to do something beats a configurable one.
 
 The UI is a dense developer tool. Small type, tight spacing, monospace for file
 paths. Colour means something or isn't there. Nothing moves unless it was
-clicked.
+clicked. Visual language and delta.dev styling patterns live in `DESIGN.md`.
 
 There's a frontend design skill that activates on its own for UI work. Use it,
 but the paragraph above overrules it — it will reach for motion, depth and big
