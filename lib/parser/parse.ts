@@ -109,10 +109,13 @@ export function parseFiles(
       }
     }
 
-    // 3. Dynamic imports
-    const dynamicCalls = sourceFile
-      .getDescendantsOfKind(SyntaxKind.CallExpression)
-      .filter((c) => c.getExpression().getKind() === SyntaxKind.ImportKeyword);
+    // 3. Dynamic imports and CommonJS require()
+    const allCallExpressions = sourceFile.getDescendantsOfKind(SyntaxKind.CallExpression);
+
+    // 3a. Dynamic imports: import(...)
+    const dynamicCalls = allCallExpressions.filter(
+      (c) => c.getExpression().getKind() === SyntaxKind.ImportKeyword
+    );
 
     for (const call of dynamicCalls) {
       const args = call.getArguments();
@@ -148,6 +151,51 @@ export function parseFiles(
           specifier: firstArg.getText(),
           kind: 'dynamic',
           reason: 'Dynamic import has non-literal specifier (cannot be statically resolved)',
+          line,
+        });
+      }
+    }
+
+    // 3b. CommonJS require(...) calls
+    const requireCalls = allCallExpressions.filter((c) => {
+      const expr = c.getExpression();
+      return expr.getKind() === SyntaxKind.Identifier && expr.getText() === 'require';
+    });
+
+    for (const call of requireCalls) {
+      const args = call.getArguments();
+      const line = call.getStartLineNumber();
+
+      if (args.length === 0) {
+        totalImports++;
+        failedCount++;
+        failures.push({
+          sourceFile: candidate.path,
+          specifier: '',
+          kind: 'require',
+          reason: 'require() missing specifier argument',
+          line,
+        });
+        continue;
+      }
+
+      const firstArg = args[0];
+      const isLiteral =
+        firstArg.getKind() === SyntaxKind.StringLiteral ||
+        firstArg.getKind() === SyntaxKind.NoSubstitutionTemplateLiteral;
+
+      if (isLiteral) {
+        const literalNode = firstArg as StringLiteral | NoSubstitutionTemplateLiteral;
+        const specifier = literalNode.getLiteralValue();
+        importsToProcess.push({ specifier, kind: 'require', line });
+      } else {
+        totalImports++;
+        failedCount++;
+        failures.push({
+          sourceFile: candidate.path,
+          specifier: firstArg.getText(),
+          kind: 'require',
+          reason: 'require() has non-literal specifier (cannot be statically resolved)',
           line,
         });
       }

@@ -21,10 +21,6 @@ export function FoldedNodeComponent({ data }: { data: FoldedNodeData }) {
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onSelect(node.id);
-  };
-
-  const handleDoubleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
     onOpen(node.id);
   };
 
@@ -52,12 +48,11 @@ export function FoldedNodeComponent({ data }: { data: FoldedNodeData }) {
   return (
     <div
       onClick={handleClick}
-      onDoubleClick={handleDoubleClick}
       onMouseEnter={() => onHover?.({ type: 'node', id: node.id })}
       onMouseLeave={() => onHover?.(null)}
       style={{ width: `${node.width}px`, height: `${node.height}px` }}
       className={`relative flex flex-col justify-between rounded-[4px] border ${borderClass} ${bgClass} ${textClass} ${opacityClass} p-2 font-mono transition-all duration-100 cursor-pointer select-none group`}
-      title={`${node.path}\n${node.files.length} files\nFan-in: ${node.fanIn}, Fan-out: ${node.fanOut}\nDouble-click to expand into panel`}
+      title={`${node.path}\n${node.files.length} files\nFan-in: ${node.fanIn}, Fan-out: ${node.fanOut}\nClick to expand into panel`}
     >
       {/* Target Handle on Left */}
       <Handle

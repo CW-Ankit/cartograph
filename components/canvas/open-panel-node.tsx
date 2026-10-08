@@ -90,8 +90,8 @@ export function OpenPanelNodeComponent({ data }: { data: OpenPanelNodeData }) {
         </div>
       </div>
 
-      {/* Scrollable File Rows Container (nowheel class prevents zooming canvas when scrolling files) */}
-      <div className="flex flex-col divide-y divide-border-subtle bg-surface max-h-[312px] overflow-y-auto nowheel">
+      {/* Scrollable File Rows Container (nowheel, nopan, nodrag prevent canvas zoom/pan/drag when scrolling files) */}
+      <div className="flex flex-col divide-y divide-border-subtle bg-surface max-h-[312px] overflow-y-auto nowheel nopan nodrag">
         {node.files.map((file) => {
           const isSelected = selectedFileId === file.id;
           const isActive = activeFileIds.has(file.id);

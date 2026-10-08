@@ -3,7 +3,7 @@
  * Everything built downstream reads this output shape.
  */
 
-export type ImportKind = 'import' | 'reexport' | 'dynamic';
+export type ImportKind = 'import' | 'reexport' | 'dynamic' | 'require';
 
 export interface ParsedFile {
   /** Relative POSIX path from repository root, e.g. "lib/parser/types.ts" */
