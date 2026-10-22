@@ -24,25 +24,16 @@ function optionalEnv(key: string, defaultValue: string): string {
 }
 
 export const env = {
-  // Clerk keys
-  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: requireEnv('NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY'),
-  CLERK_SECRET_KEY: requireEnv('CLERK_SECRET_KEY'),
+  // Neon Postgres database
+  DATABASE_URL: requireEnv('DATABASE_URL'),
 
-  // Supabase keys
-  NEXT_PUBLIC_SUPABASE_URL: requireEnv('NEXT_PUBLIC_SUPABASE_URL'),
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: requireEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY'),
+  // Neon Managed Better Auth
+  NEON_AUTH_BASE_URL: requireEnv('NEON_AUTH_BASE_URL'),
+  NEON_AUTH_COOKIE_SECRET: requireEnv('NEON_AUTH_COOKIE_SECRET'),
 
   // Routing and App URL
-  NEXT_PUBLIC_CLERK_SIGN_IN_URL: optionalEnv('NEXT_PUBLIC_CLERK_SIGN_IN_URL', '/sign-in'),
-  NEXT_PUBLIC_CLERK_SIGN_UP_URL: optionalEnv('NEXT_PUBLIC_CLERK_SIGN_UP_URL', '/sign-up'),
-  NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL: optionalEnv(
-    'NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL',
-    '/'
-  ),
-  NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL: optionalEnv(
-    'NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL',
-    '/'
-  ),
+  NEXT_PUBLIC_SIGN_IN_URL: optionalEnv('NEXT_PUBLIC_SIGN_IN_URL', '/auth/sign-in'),
+  NEXT_PUBLIC_SIGN_UP_URL: optionalEnv('NEXT_PUBLIC_SIGN_UP_URL', '/auth/sign-up'),
   NEXT_PUBLIC_APP_URL: optionalEnv('NEXT_PUBLIC_APP_URL', 'http://localhost:3000'),
 } as const;
 
