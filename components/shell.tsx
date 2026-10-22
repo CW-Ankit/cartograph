@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { OrganizationSwitcher } from '@neondatabase/auth-ui';
-import { ThemeToggle } from './theme-toggle';
+import { UserProfileMenu } from './user-profile-menu';
 import { InviteModal } from './invite-modal';
 import { Dashboard } from './dashboard';
 import { LeftRail } from './canvas/left-rail';
@@ -78,14 +78,18 @@ export function Shell({
           )}
         </div>
 
-        {/* Right: Actions, Theme Toggle */}
+        {/* Right: Actions & User Profile Menu (with embedded theme toggle) */}
         <div className="flex items-center gap-2">
           {!isScaffoldPreview && organization && (
             <InviteModal orgName={organization.name} />
           )}
 
-          {/* Theme Switcher */}
-          <ThemeToggle />
+          {/* Profile Menu with integrated theme settings */}
+          {!isScaffoldPreview && (
+            <div className="ml-1 flex items-center">
+              <UserProfileMenu />
+            </div>
+          )}
         </div>
       </header>
 
