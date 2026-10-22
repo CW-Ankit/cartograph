@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@neondatabase/auth-ui/tailwind";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -15,9 +16,42 @@
   --accent-foreground: #ffffff;
   --incoming: #16a34a;
   --outgoing: #d97706;
+
+  /* Better Auth UI theme bindings (Light) */
+  --neon-radius: 4px;
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --popover: var(--surface);
+  --popover-foreground: var(--foreground);
+  --primary: var(--accent);
+  --primary-foreground: var(--accent-foreground);
+  --secondary: var(--surface-raised);
+  --secondary-foreground: var(--foreground);
+  --muted: var(--surface-raised);
+  --muted-foreground: var(--foreground-muted);
+  --input: var(--border);
+  --ring: var(--accent);
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+
+  --neon-background: var(--background);
+  --neon-foreground: var(--foreground);
+  --neon-card: var(--surface);
+  --neon-card-foreground: var(--foreground);
+  --neon-popover: var(--surface);
+  --neon-popover-foreground: var(--foreground);
+  --neon-primary: var(--accent);
+  --neon-primary-foreground: var(--accent-foreground);
+  --neon-secondary: var(--surface-raised);
+  --neon-secondary-foreground: var(--foreground);
+  --neon-muted: var(--surface-raised);
+  --neon-muted-foreground: var(--foreground-muted);
+  --neon-border: var(--border);
+  --neon-input: var(--border);
+  --neon-ring: var(--accent);
 }
 
-html.dark {
+html.dark, :root.dark {
   color-scheme: dark;
   --background: #09090b;
   --surface: #111114;
@@ -30,6 +64,39 @@ html.dark {
   --accent-foreground: #ffffff;
   --incoming: #22c55e;
   --outgoing: #f59e0b;
+
+  /* Better Auth UI theme bindings (Dark) */
+  --neon-radius: 4px;
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --popover: var(--surface);
+  --popover-foreground: var(--foreground);
+  --primary: var(--accent);
+  --primary-foreground: var(--accent-foreground);
+  --secondary: var(--surface-raised);
+  --secondary-foreground: var(--foreground);
+  --muted: var(--surface-raised);
+  --muted-foreground: var(--foreground-muted);
+  --input: var(--border);
+  --ring: var(--accent);
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  --neon-background: var(--background);
+  --neon-foreground: var(--foreground);
+  --neon-card: var(--surface);
+  --neon-card-foreground: var(--foreground);
+  --neon-popover: var(--surface);
+  --neon-popover-foreground: var(--foreground);
+  --neon-primary: var(--accent);
+  --neon-primary-foreground: var(--accent-foreground);
+  --neon-secondary: var(--surface-raised);
+  --neon-secondary-foreground: var(--foreground);
+  --neon-muted: var(--surface-raised);
+  --neon-muted-foreground: var(--foreground-muted);
+  --neon-border: var(--border);
+  --neon-input: var(--border);
+  --neon-ring: var(--accent);
 }
 
 @theme inline {
@@ -51,12 +118,12 @@ html.dark {
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   letter-spacing: -0.01em;
 }
 
-/* Dense monospace for file paths and identifiers */
-.font-mono, code, pre, kbd {
+/* Geist Mono prioritized for code, identifiers, file paths, and dense dev controls */
+.font-mono, code, pre, kbd, [data-mono] {
   font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
@@ -67,18 +134,14 @@ body {
 }
 
 /* =========================================================================
-   Clerk Component Theme & Styling (Delta-inspired Developer Aesthetic)
+   Better Auth UI Theme & Styling (Delta-inspired Developer Aesthetic)
    ========================================================================= */
 
-.cl-rootBox {
-  display: inline-flex;
-  align-items: center;
-  font-family: var(--font-geist-mono), monospace;
-}
-
 /* Organization Switcher Trigger Button */
-.cl-organizationSwitcherTrigger {
+#server-rendered-org button {
   height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
   padding: 0 8px !important;
   background-color: var(--surface) !important;
   border: 1px solid var(--border) !important;
@@ -88,107 +151,116 @@ body {
   font-size: 11px !important;
   letter-spacing: -0.01em !important;
   box-shadow: none !important;
-  transition: all 120ms cubic-bezier(0.16, 1, 0.3, 1) !important;
   display: inline-flex !important;
   align-items: center !important;
   gap: 6px !important;
-}
-
-.cl-organizationSwitcherTrigger:hover {
-  background-color: var(--surface-raised) !important;
-  border-color: var(--accent) !important;
-}
-
-.cl-organizationSwitcherTrigger:focus,
-.cl-organizationSwitcherTrigger:focus-visible {
-  outline: none !important;
-  border-color: var(--accent) !important;
-  box-shadow: 0 0 0 1px var(--accent) !important;
-}
-
-.cl-organizationSwitcherTrigger *,
-.cl-organizationPreview,
-.cl-organizationPreviewTextContainer,
-.cl-organizationPreviewMainIdentifier {
-  color: var(--foreground) !important;
-  font-family: var(--font-geist-mono), monospace !important;
-  font-size: 11px !important;
-  font-weight: 500 !important;
-}
-
-.cl-organizationPreviewAvatarBox {
-  width: 16px !important;
-  height: 16px !important;
-  border-radius: 3px !important;
-  border: 1px solid var(--border) !important;
-  overflow: hidden !important;
-}
-
-.cl-organizationPreviewSecondaryIdentifier,
-.cl-organizationSwitcherTriggerIcon {
-  color: var(--foreground-muted) !important;
-  opacity: 0.8;
-}
-
-/* User Button */
-.cl-userButtonTrigger {
-  border-radius: 4px !important;
-  border: 1px solid var(--border) !important;
-  padding: 2px !important;
-  background-color: var(--surface) !important;
   transition: all 120ms ease !important;
 }
 
-.cl-userButtonTrigger:hover {
-  border-color: var(--accent) !important;
+#server-rendered-org button:hover {
   background-color: var(--surface-raised) !important;
+  border-color: var(--accent) !important;
 }
 
-.cl-userButtonAvatarBox {
-  width: 22px !important;
-  height: 22px !important;
-  border-radius: 3px !important;
-}
-
-/* Clerk Popovers & Dropdown Menus */
-.cl-organizationSwitcherPopoverCard,
-.cl-userButtonPopoverCard {
+/* Radix Menus, Popovers and Dialogs */
+[data-radix-popper-content-wrapper] [role="menu"],
+[data-radix-dropdown-menu-content] {
   background-color: var(--surface) !important;
   border: 1px solid var(--border) !important;
-  border-radius: 6px !important;
+  border-radius: 4px !important;
   color: var(--foreground) !important;
   font-family: var(--font-geist-mono), monospace !important;
-  font-size: 12px !important;
-  box-shadow: 0 12px 30px -4px rgb(0 0 0 / 0.35), 0 4px 10px -2px rgb(0 0 0 / 0.2) !important;
-  padding: 6px !important;
+  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.4), 0 4px 10px -2px rgba(0, 0, 0, 0.25) !important;
+  padding: 4px !important;
 }
 
-.cl-organizationSwitcherPopoverActions,
-.cl-userButtonPopoverActions,
-.cl-organizationSwitcherPopoverFooter,
-.cl-userButtonPopoverFooter {
-  border-color: var(--border) !important;
-  padding-top: 6px !important;
-  margin-top: 6px !important;
-}
-
-.cl-organizationSwitcherPopoverActionButton,
-.cl-userButtonPopoverActionButton,
-.cl-userPreviewMainIdentifier,
-.cl-userButtonPopoverActionButtonText {
-  color: var(--foreground) !important;
+[role="menuitem"] {
+  border-radius: 3px !important;
   font-family: var(--font-geist-mono), monospace !important;
   font-size: 11px !important;
-  border-radius: 4px !important;
+  color: var(--foreground) !important;
+  padding: 4px 8px !important;
   transition: background-color 100ms ease !important;
 }
 
-.cl-organizationSwitcherPopoverActionButton:hover,
-.cl-userButtonPopoverActionButton:hover {
+[role="menuitem"]:hover,
+[role="menuitem"]:focus {
   background-color: var(--surface-raised) !important;
+  color: var(--foreground) !important;
+  outline: none !important;
+}
+
+/* Better Auth Cards and Settings Forms */
+.neon-auth-ui,
+[data-slot="card"] {
+  --radius: 4px;
+}
+
+/* Settings & Auth Cards */
+div[class*="rounded-xl"],
+div[class*="rounded-2xl"],
+div[class*="rounded-lg"] {
+  border-radius: 4px !important;
+}
+
+/* Inputs across Better Auth */
+.neon-auth-ui input,
+.neon-auth-ui select,
+.neon-auth-ui textarea,
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  border-radius: 4px !important;
+  border: 1px solid var(--border) !important;
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+  font-family: var(--font-geist-mono), monospace !important;
+  font-size: 12px !important;
+  transition: border-color 100ms ease, box-shadow 100ms ease !important;
+}
+
+.neon-auth-ui input:focus,
+.neon-auth-ui select:focus,
+.neon-auth-ui textarea:focus,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 1px var(--accent) !important;
+  outline: none !important;
+}
+
+/* Primary Action Buttons */
+.neon-auth-ui button[type="submit"] {
+  background-color: var(--accent) !important;
+  color: var(--accent-foreground) !important;
+  border-radius: 4px !important;
+  border: none !important;
+  font-family: var(--font-geist-mono), monospace !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.01em !important;
+  box-shadow: none !important;
+  transition: filter 100ms ease !important;
+}
+
+.neon-auth-ui button[type="submit"]:hover {
+  filter: brightness(1.1) !important;
+}
+
+/* Labels and Helper Text */
+.neon-auth-ui label {
+  font-family: var(--font-geist-mono), monospace !important;
+  font-size: 11px !important;
+  color: var(--foreground-muted) !important;
+  letter-spacing: 0.02em !important;
+}
+
+.neon-auth-ui h1,
+.neon-auth-ui h2,
+.neon-auth-ui h3 {
+  font-family: var(--font-geist-sans), sans-serif !important;
+  letter-spacing: -0.02em !important;
   color: var(--foreground) !important;
 }
 
-.cl-userPreviewSecondaryIdentifier {
-  color: var(--foreground-muted) !important;
-}
