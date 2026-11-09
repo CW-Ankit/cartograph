@@ -15,7 +15,7 @@ import '@xyflow/react/dist/style.css';
 
 import type { ParseResult } from '@/lib/parser/types';
 import { foldRepository } from '@/lib/graph/folding';
-import { calculateDagreLayout, MAX_PANEL_FILES } from '@/lib/graph/layout';
+import { calculateDagreLayout } from '@/lib/graph/layout';
 import { FoldedNodeComponent } from './folded-node';
 import { OpenPanelNodeComponent } from './open-panel-node';
 import type { CanvasSelectionTarget, CanvasHoverTarget } from './right-pane';
@@ -324,10 +324,13 @@ function GraphCanvasInner({
     handleHover,
   ]);
 
-  // 5. Construct React Flow edges
+  // 5. Construct React Flow edges: uncluttered, graceful bezier curves with high-contrast active paths
   const flowEdges: FlowEdge[] = useMemo(() => {
     const edgeList: FlowEdge[] = [];
-    const closedPairsDrawn = new Set<string>();
+    const drawnPairs = new Set<string>();
+
+    const hasSelection = selectedTarget !== null;
+    const hasHover = hoveredTarget !== null;
 
     for (const edge of derivedEdges) {
       if (edge.sourceNodeId === edge.targetNodeId) continue;
@@ -335,17 +338,9 @@ function GraphCanvasInner({
       const isSourceOpen = effectiveOpenNodeIds.has(edge.sourceNodeId);
       const isTargetOpen = effectiveOpenNodeIds.has(edge.targetNodeId);
 
-      // If both are closed, deduplicate visually to one connection line between nodes
-      if (!isSourceOpen && !isTargetOpen) {
-        const pairKey = `${edge.sourceNodeId}-->${edge.targetNodeId}`;
-        if (closedPairsDrawn.has(pairKey)) continue;
-        closedPairsDrawn.add(pairKey);
-      }
-
-      const isEdgeActive = selectionInfo.activeEdgeIds.has(edge.id);
       const isOutgoing = selectionInfo.outgoingEdgeIds.has(edge.id);
       const isIncoming = selectionInfo.incomingEdgeIds.has(edge.id);
-      const isDimmed = selectedTarget !== null && !isEdgeActive;
+      const isEdgeActive = isOutgoing || isIncoming;
 
       // Hover connection highlighting
       const isHoverEdge =
@@ -355,48 +350,96 @@ function GraphCanvasInner({
           ? edge.sourceNodeId === hoveredTarget.id || edge.targetNodeId === hoveredTarget.id
           : false;
 
-      // Handle resolution for open panels
+      // Resting State (no selection, no hover):
+      // Deduplicate to ONE clean, graceful bundle wire per folder pair to eliminate hairball clutter
+      if (!hasSelection && !hasHover) {
+        const pairKey = `${edge.sourceNodeId}-->${edge.targetNodeId}`;
+        if (drawnPairs.has(pairKey)) continue;
+        drawnPairs.add(pairKey);
+
+        edgeList.push({
+          id: `bundle-${pairKey}`,
+          source: edge.sourceNodeId,
+          target: edge.targetNodeId,
+          sourceHandle: isSourceOpen ? `${edge.sourceNodeId}-source` : null,
+          targetHandle: isTargetOpen ? `${edge.targetNodeId}-target` : null,
+          type: 'default', // graceful curved bezier
+          animated: false,
+          zIndex: 2,
+          style: {
+            stroke: '#52525b',
+            strokeWidth: 1.5,
+            opacity: 0.65,
+            transition: 'all 120ms ease',
+          },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            width: 8,
+            height: 8,
+            color: '#71717a',
+          },
+        });
+        continue;
+      }
+
+      // Active / Selection State:
+      // Background (non-active, non-hovered) edges are drawn as very subtle background traces (one per pair)
+      if (!isEdgeActive && !isHoverEdge) {
+        const pairKey = `${edge.sourceNodeId}-->${edge.targetNodeId}`;
+        if (drawnPairs.has(pairKey)) continue;
+        drawnPairs.add(pairKey);
+
+        edgeList.push({
+          id: `dimmed-${pairKey}`,
+          source: edge.sourceNodeId,
+          target: edge.targetNodeId,
+          sourceHandle: isSourceOpen ? `${edge.sourceNodeId}-source` : null,
+          targetHandle: isTargetOpen ? `${edge.targetNodeId}-target` : null,
+          type: 'default',
+          animated: false,
+          zIndex: 1,
+          style: {
+            stroke: 'var(--border)',
+            strokeWidth: 1,
+            opacity: 0.12,
+            transition: 'all 120ms ease',
+          },
+        });
+        continue;
+      }
+
+      // Primary active / hovered connection: prominent, vibrant color and exact handle wiring
       let sourceHandle: string | null = null;
       let targetHandle: string | null = null;
 
       if (isSourceOpen) {
-        const sourceNode = foldedNodes.find((n) => n.id === edge.sourceNodeId);
-        const sourceIndex = sourceNode?.files.findIndex((f) => f.id === edge.sourceFileId) ?? -1;
-        sourceHandle =
-          sourceIndex >= 0 && sourceIndex < MAX_PANEL_FILES
-            ? edge.sourceFileId
-            : `${edge.sourceNodeId}-source`;
+        sourceHandle = edge.sourceFileId;
+      } else {
+        sourceHandle = `${edge.sourceNodeId}-source`;
       }
 
       if (isTargetOpen) {
-        const targetNode = foldedNodes.find((n) => n.id === edge.targetNodeId);
-        const targetIndex = targetNode?.files.findIndex((f) => f.id === edge.targetFileId) ?? -1;
-        targetHandle =
-          targetIndex >= 0 && targetIndex < MAX_PANEL_FILES
-            ? edge.targetFileId
-            : `${edge.targetNodeId}-target`;
+        targetHandle = edge.targetFileId;
+      } else {
+        targetHandle = `${edge.targetNodeId}-target`;
       }
 
-      // Edge styling per delta.dev guidelines
-      let strokeColor = '#3f3f46';
-      let strokeWidth = 1;
-      let zIndex = 1;
+      let strokeColor = '#71717a';
+      let strokeWidth = 2;
+      let zIndex = 20;
 
       if (isHoverEdge) {
         strokeColor = 'var(--accent)';
         strokeWidth = 2.5;
-        zIndex = 25;
+        zIndex = 40;
       } else if (isOutgoing) {
         strokeColor = 'var(--outgoing)';
-        strokeWidth = 2;
-        zIndex = 10;
+        strokeWidth = 2.2;
+        zIndex = 30;
       } else if (isIncoming) {
         strokeColor = 'var(--incoming)';
-        strokeWidth = 2;
-        zIndex = 10;
-      } else if (isDimmed) {
-        strokeColor = 'var(--border)';
-        strokeWidth = 0.8;
+        strokeWidth = 2.2;
+        zIndex = 30;
       }
 
       edgeList.push({
@@ -405,26 +448,32 @@ function GraphCanvasInner({
         target: edge.targetNodeId,
         sourceHandle,
         targetHandle,
-        type: 'smoothstep',
+        type: 'default',
         animated: false,
         zIndex,
         style: {
           stroke: strokeColor,
           strokeWidth,
-          opacity: isHoverEdge ? 1 : isDimmed ? 0.1 : 0.85,
+          opacity: 1,
           transition: 'all 120ms ease',
         },
         markerEnd: {
           type: MarkerType.ArrowClosed,
-          width: 8,
-          height: 8,
+          width: 9,
+          height: 9,
           color: strokeColor,
         },
       });
     }
 
     return edgeList;
-  }, [derivedEdges, effectiveOpenNodeIds, foldedNodes, selectionInfo, selectedTarget, hoveredTarget]);
+  }, [
+    derivedEdges,
+    effectiveOpenNodeIds,
+    selectionInfo,
+    selectedTarget,
+    hoveredTarget,
+  ]);
 
   return (
     <div className="relative h-full w-full bg-background bg-grid-pattern">

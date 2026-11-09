@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { UserPlus, X, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { inviteMember } from '@/app/actions/org';
 
 interface InviteModalProps {
@@ -49,7 +50,7 @@ export function InviteModal({ orgName }: InviteModalProps) {
         className="h-7 inline-flex items-center gap-1.5 rounded-[4px] border border-border bg-surface px-2.5 py-0 font-mono text-xs text-foreground transition-all duration-100 hover:bg-surface-raised hover:border-accent"
         title="Invite team member"
       >
-        <span className="text-accent font-bold leading-none">+</span>
+        <UserPlus className="h-3.5 w-3.5 text-accent" strokeWidth={1.75} />
         <span>invite</span>
       </button>
 
@@ -73,9 +74,9 @@ export function InviteModal({ orgName }: InviteModalProps) {
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="font-mono text-xs text-foreground-muted hover:text-foreground px-1.5 py-0.5 rounded-[3px] hover:bg-surface-raised"
+                className="font-mono text-xs text-foreground-muted hover:text-foreground p-1 rounded-[3px] hover:bg-surface-raised"
               >
-                ✕
+                <X className="h-3.5 w-3.5" strokeWidth={1.75} />
               </button>
             </div>
 
@@ -118,13 +119,18 @@ export function InviteModal({ orgName }: InviteModalProps) {
 
               {status && (
                 <div
-                  className={`rounded-[3px] p-2 text-[11px] font-mono ${
+                  className={`flex items-start gap-2 rounded-[3px] p-2 text-[11px] font-mono ${
                     status.type === 'success'
                       ? 'border border-incoming/30 bg-incoming/10 text-incoming'
                       : 'border border-outgoing/30 bg-outgoing/10 text-outgoing'
                   }`}
                 >
-                  {status.message}
+                  {status.type === 'success' ? (
+                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0 mt-0.5 text-incoming" strokeWidth={1.75} />
+                  ) : (
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5 text-outgoing" strokeWidth={1.75} />
+                  )}
+                  <span>{status.message}</span>
                 </div>
               )}
 
@@ -139,9 +145,10 @@ export function InviteModal({ orgName }: InviteModalProps) {
                 <button
                   type="submit"
                   disabled={isSubmitting || !email.trim()}
-                  className="rounded-[3px] bg-accent px-3 py-1 font-mono text-xs font-medium text-accent-foreground hover:opacity-90 disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-[3px] bg-accent px-3 py-1 font-mono text-xs font-medium text-accent-foreground hover:opacity-90 disabled:opacity-50"
                 >
-                  {isSubmitting ? 'sending...' : 'send invitation'}
+                  {isSubmitting && <Loader2 className="h-3 w-3 animate-spin" strokeWidth={2} />}
+                  <span>{isSubmitting ? 'sending...' : 'send invitation'}</span>
                 </button>
               </div>
             </form>

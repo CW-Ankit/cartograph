@@ -146,16 +146,17 @@ exactly that has failed.
 edges. No data fetching inside them, nothing to mock in order to check them.
 
 **Identity is a token, and the token carries the organization.** Sign-in and
-teams come from Clerk. Everything after that decides what someone may see by
+teams come from Neon Auth (Managed Better Auth). Everything after that decides what someone may see by
 reading the organization claim off that token. Nothing in the application asks
 the identity provider a question at runtime.
 
-**The database is Postgres on Supabase**, and access to it is a policy rather
+**The database is Serverless Postgres on Neon**, and access to it is a policy rather
 than a check the application remembers to perform. Rows belong to an
-organization, the policy reads the organization off the token, and that is the
+organization, the policy reads the organization off the session/token, and that is the
 whole authorization layer. The distinction matters: signing in from a different
 organization should show the first one's rows are not hidden by the interface
 but absent from the query.
+
 
 **Row-level security is on by default, not per table.** An agent is writing
 these migrations, and the two failure modes are not symmetrical. A table with

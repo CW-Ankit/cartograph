@@ -1,131 +1,90 @@
-import { auth, clerkClient } from '@clerk/nextjs/server';
+import { auth } from '@/lib/auth/server';
 import { redirect } from 'next/navigation';
 import { Shell } from '@/components/shell';
-import { AutoActivateOrg } from '@/components/auto-activate-org';
-import { getDatabaseClient } from '@/lib/supabase';
+import { getDatabaseClient } from '@/lib/db';
 import { DbAnalysis } from '@/types/database';
 
+export const dynamic = 'force-dynamic';
+
 export default async function HomePage() {
-  const { userId, orgId, orgSlug, orgRole } = await auth();
+  const { data: session } = await auth.getSession();
 
   // If not signed in, redirect to sign-in (defensive check; proxy already guards)
-  if (!userId) {
-    redirect('/sign-in');
+  if (!session?.user) {
+    redirect('/auth/sign-in');
   }
 
-  const clerk = await clerkClient();
+  const activeOrgId = (session.session as unknown as { activeOrganizationId?: string })?.activeOrganizationId;
 
-  // If user is signed in and already has an active organization, render shell directly
-  if (orgId) {
-    const organization = await clerk.organizations.getOrganization({
-      organizationId: orgId,
-    });
+  const sql = await getDatabaseClient();
 
-    const supabase = await getDatabaseClient();
-
-    // Query analyses for the active workspace.
-    // Spec constraint: Authorization is a property of the database.
-    // The query does NOT filter by organization in application code.
-    // The database policy reads the organization claim off the auth token.
-    const { data: analyses, error } = await supabase
-      .from('analyses')
-      .select(`
-        id,
-        organization_id,
-        project_id,
-        commit_hash,
-        status,
-        error_message,
-        file_count,
-        edge_count,
-        route_count,
-        coverage_percent,
-        stats,
-        created_at,
-        updated_at,
-        projects (
-          name,
-          repository_url,
-          default_branch
-        )
-      `)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('[Cartograph] Error fetching analyses:', error);
-    }
-
-    // Cast the returned data with strict typed representation
-    const typedAnalyses: DbAnalysis[] = (analyses ?? []).map((row) => {
-      // Supabase join types may return object or array depending on relationship inference
-      const rawProject = row.projects;
-      const project = Array.isArray(rawProject)
-        ? rawProject[0]
-        : (rawProject as { name: string; repository_url: string; default_branch: string } | null);
-
-      return {
-        id: row.id,
-        organization_id: row.organization_id,
-        project_id: row.project_id,
-        commit_hash: row.commit_hash,
-        status: row.status,
-        error_message: row.error_message,
-        file_count: row.file_count,
-        edge_count: row.edge_count,
-        route_count: row.route_count,
-        coverage_percent: row.coverage_percent,
-        stats: (row.stats as Record<string, unknown>) ?? {},
-        created_at: row.created_at,
-        updated_at: row.updated_at,
-        projects: project,
-      };
-    });
-
-    return (
-      <Shell
-        organization={{
-          id: organization.id,
-          name: organization.name,
-          slug: orgSlug || organization.slug,
-          role: orgRole ?? null,
-        }}
-        analyses={typedAnalyses}
-      />
-    );
+  // Query analyses for the active workspace.
+  // Spec constraint: Authorization is a property of the database.
+  // The query does NOT filter by organization in application code.
+  // The database policy reads the organization claim off the auth token via Neon Authorize.
+  let rows: Record<string, unknown>[] = [];
+  try {
+    rows = await sql`
+      SELECT
+        a.id,
+        a.organization_id,
+        a.project_id,
+        a.commit_hash,
+        a.status,
+        a.error_message,
+        a.file_count,
+        a.edge_count,
+        a.route_count,
+        a.coverage_percent,
+        a.stats,
+        a.created_at,
+        a.updated_at,
+        json_build_object(
+          'name', p.name,
+          'repository_url', p.repository_url,
+          'default_branch', p.default_branch
+        ) as projects
+      FROM analyses a
+      LEFT JOIN projects p ON a.project_id = p.id
+      ORDER BY a.created_at DESC;
+    `;
+  } catch (error) {
+    console.error('[Cartograph] Error fetching analyses from Neon:', error);
   }
 
-  // Handle first-time sign in: user has no active organization selected
-  // Check if they already belong to any organization
-  const memberships = await clerk.users.getOrganizationMembershipList({
-    userId,
-    limit: 10,
+  // Cast the returned data with strict typed representation
+  const typedAnalyses: DbAnalysis[] = rows.map((row) => {
+    const project = row.projects as { name: string; repository_url: string; default_branch: string } | null;
+
+    return {
+      id: String(row.id),
+      organization_id: String(row.organization_id),
+      project_id: String(row.project_id),
+      commit_hash: typeof row.commit_hash === 'string' ? row.commit_hash : null,
+      status: row.status as DbAnalysis['status'],
+      error_message: typeof row.error_message === 'string' ? row.error_message : null,
+      file_count: Number(row.file_count),
+      edge_count: Number(row.edge_count),
+      route_count: Number(row.route_count),
+      coverage_percent: row.coverage_percent != null ? Number(row.coverage_percent) : null,
+      stats: (row.stats && typeof row.stats === 'object') ? (row.stats as Record<string, unknown>) : {},
+      created_at: String(row.created_at),
+      updated_at: String(row.updated_at),
+      projects: project,
+    };
   });
 
-  if (memberships.data.length > 0) {
-    // Activate their first organization automatically
-    const targetOrgId = memberships.data[0].organization.id;
-    return <AutoActivateOrg targetOrgId={targetOrgId} />;
-  }
+  const userName = session.user.name || session.user.email?.split('@')[0] || 'Default';
 
-  // Brand new account with no organization: auto-provision one without asking them to create it
-  const user = await clerk.users.getUser(userId);
-  const primaryEmail =
-    user.emailAddresses?.find((e) => e.id === user.primaryEmailAddressId)?.emailAddress ||
-    user.emailAddresses?.[0]?.emailAddress;
-
-  const defaultName = user.firstName
-    ? `${user.firstName}'s Team`
-    : user.username
-    ? `${user.username}'s Team`
-    : primaryEmail
-    ? `${primaryEmail.split('@')[0]}'s Team`
-    : 'Default Team';
-
-  const newOrg = await clerk.organizations.createOrganization({
-    name: defaultName,
-    createdBy: userId,
-  });
-
-  // Activate the newly created organization in the session
-  return <AutoActivateOrg targetOrgId={newOrg.id} />;
+  return (
+    <Shell
+      organization={{
+        id: activeOrgId || session.user.id,
+        name: activeOrgId ? `${userName}'s Workspace` : `${userName}'s Team`,
+        slug: null,
+        role: 'admin',
+      }}
+      analyses={typedAnalyses}
+    />
+  );
 }

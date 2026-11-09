@@ -1,13 +1,56 @@
-import { ClerkProvider } from "@clerk/nextjs";
+import { AuthProvider } from "@/components/auth/auth-provider";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
+import { Geist_Mono } from "next/font/google";
 import { cookies } from "next/headers";
 import { ThemeScript } from "@/components/theme-script";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const ubuntu = localFont({
+  src: [
+    {
+      path: "../public/fonts/Ubuntu-Light.ttf",
+      weight: "300",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/Ubuntu-LightItalic.ttf",
+      weight: "300",
+      style: "italic",
+    },
+    {
+      path: "../public/fonts/Ubuntu-Regular.ttf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/Ubuntu-Italic.ttf",
+      weight: "400",
+      style: "italic",
+    },
+    {
+      path: "../public/fonts/Ubuntu-Medium.ttf",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/Ubuntu-MediumItalic.ttf",
+      weight: "500",
+      style: "italic",
+    },
+    {
+      path: "../public/fonts/Ubuntu-Bold.ttf",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/Ubuntu-BoldItalic.ttf",
+      weight: "700",
+      style: "italic",
+    },
+  ],
+  variable: "--font-ubuntu",
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -33,7 +76,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${initialDark ? "dark" : ""} h-full antialiased`}
+      className={`${ubuntu.variable} ${geistMono.variable} ${initialDark ? "dark" : ""} h-full antialiased`}
       data-theme={dataTheme}
       suppressHydrationWarning
     >
@@ -41,9 +84,9 @@ export default async function RootLayout({
         <ThemeScript />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground antialiased" suppressHydrationWarning>
-        <ClerkProvider>
+        <AuthProvider>
           {children}
-        </ClerkProvider>
+        </AuthProvider>
       </body>
     </html>
   );

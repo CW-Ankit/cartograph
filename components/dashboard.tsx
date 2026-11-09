@@ -1,5 +1,6 @@
 import { DbAnalysis } from '@/types/database';
 import { formatRelativeTime } from '@/lib/format';
+import { GitBranch, FolderGit2, CheckCircle2, Loader2, Clock, AlertCircle, Layers } from 'lucide-react';
 
 interface DashboardProps {
   organizationName: string;
@@ -14,7 +15,7 @@ export function Dashboard({ organizationName, analyses }: DashboardProps) {
         <div className="flex flex-col gap-1 border-b border-border pb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-sm text-accent">◈</span>
+              <Layers className="h-4 w-4 text-accent" strokeWidth={1.75} />
               <h1 className="font-mono text-sm font-semibold tracking-tight text-foreground">
                 Repository Analyses
               </h1>
@@ -36,8 +37,8 @@ export function Dashboard({ organizationName, analyses }: DashboardProps) {
         {analyses.length === 0 ? (
           /* Empty State for a team that has never run an analysis */
           <div className="my-12 flex flex-col items-center justify-center rounded-[4px] border border-border bg-surface p-12 text-center">
-            <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-[4px] border border-border bg-surface-raised font-mono text-base text-foreground-muted">
-              ◈
+            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-[4px] border border-border bg-surface-raised text-foreground-muted">
+              <FolderGit2 className="h-5 w-5 text-foreground-muted" strokeWidth={1.5} />
             </div>
             <div className="font-mono text-[10px] uppercase tracking-wider text-foreground-muted">
               WORKSPACE READY
@@ -76,10 +77,12 @@ export function Dashboard({ organizationName, analyses }: DashboardProps) {
                 >
                   {/* Repo + Commit */}
                   <div className="col-span-4 flex flex-col gap-0.5">
-                    <span className="font-mono font-medium text-foreground">
-                      {projectName}
+                    <span className="font-mono font-medium text-foreground flex items-center gap-1.5">
+                      <FolderGit2 className="h-3.5 w-3.5 text-accent/80 shrink-0" strokeWidth={1.75} />
+                      <span className="truncate">{projectName}</span>
                     </span>
-                    <div className="flex items-center gap-1.5 font-mono text-[11px] text-foreground-muted">
+                    <div className="flex items-center gap-1.5 font-mono text-[11px] text-foreground-muted pl-5">
+                      <GitBranch className="h-3 w-3 shrink-0 text-foreground-muted/70" strokeWidth={1.5} />
                       <span>{branch}</span>
                       <span className="text-border">@</span>
                       <span className="text-foreground-muted/80">{shortHash}</span>
@@ -121,7 +124,7 @@ export function Dashboard({ organizationName, analyses }: DashboardProps) {
 
                     {analysis.status === 'parsing' && (
                       <div className="flex items-center gap-2 text-[11px] text-accent">
-                        <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
+                        <Loader2 className="h-3 w-3 animate-spin text-accent" strokeWidth={2} />
                         <span>
                           Parsing modules ({analysis.file_count} files, {analysis.edge_count} edges
                           found)
@@ -130,23 +133,26 @@ export function Dashboard({ organizationName, analyses }: DashboardProps) {
                     )}
 
                     {analysis.status === 'pending' && (
-                      <span className="text-[11px] text-foreground-muted">
-                        Queued for parser execution
+                      <span className="flex items-center gap-1.5 text-[11px] text-foreground-muted">
+                        <Clock className="h-3 w-3 text-outgoing" strokeWidth={1.75} />
+                        <span>Queued for parser execution</span>
                       </span>
                     )}
 
                     {analysis.status === 'fetching' && (
-                      <span className="text-[11px] text-foreground-muted">
-                        Fetching repository archive...
+                      <span className="flex items-center gap-1.5 text-[11px] text-accent">
+                        <Loader2 className="h-3 w-3 animate-spin text-accent" strokeWidth={2} />
+                        <span>Fetching repository archive...</span>
                       </span>
                     )}
 
                     {analysis.status === 'failed' && (
                       <span
-                        className="truncate text-[11px] text-red-400"
+                        className="flex items-center gap-1.5 truncate text-[11px] text-red-400"
                         title={analysis.error_message ?? 'Analysis failed'}
                       >
-                        {analysis.error_message ?? 'Analysis failed'}
+                        <AlertCircle className="h-3 w-3 text-red-400 shrink-0" strokeWidth={1.75} />
+                        <span className="truncate">{analysis.error_message ?? 'Analysis failed'}</span>
                       </span>
                     )}
                   </div>
@@ -169,36 +175,36 @@ function StatusBadge({ status }: { status: DbAnalysis['status'] }) {
   switch (status) {
     case 'ready':
       return (
-        <span className="inline-flex items-center gap-1.5 rounded-[3px] border border-incoming/30 bg-incoming/10 px-2 py-0.5 font-mono text-[10px] text-incoming">
-          <span className="h-1.5 w-1.5 rounded-full bg-incoming" />
+        <span className="inline-flex items-center gap-1 rounded-[3px] border border-incoming/30 bg-incoming/10 px-2 py-0.5 font-mono text-[10px] text-incoming">
+          <CheckCircle2 className="h-2.5 w-2.5 text-incoming" strokeWidth={2} />
           ready
         </span>
       );
     case 'parsing':
       return (
-        <span className="inline-flex items-center gap-1.5 rounded-[3px] border border-accent/30 bg-accent/10 px-2 py-0.5 font-mono text-[10px] text-accent">
-          <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
+        <span className="inline-flex items-center gap-1 rounded-[3px] border border-accent/30 bg-accent/10 px-2 py-0.5 font-mono text-[10px] text-accent">
+          <Loader2 className="h-2.5 w-2.5 animate-spin text-accent" strokeWidth={2} />
           parsing
         </span>
       );
     case 'pending':
       return (
-        <span className="inline-flex items-center gap-1.5 rounded-[3px] border border-outgoing/30 bg-outgoing/10 px-2 py-0.5 font-mono text-[10px] text-outgoing">
-          <span className="h-1.5 w-1.5 rounded-full bg-outgoing" />
+        <span className="inline-flex items-center gap-1 rounded-[3px] border border-outgoing/30 bg-outgoing/10 px-2 py-0.5 font-mono text-[10px] text-outgoing">
+          <Clock className="h-2.5 w-2.5 text-outgoing" strokeWidth={2} />
           pending
         </span>
       );
     case 'fetching':
       return (
-        <span className="inline-flex items-center gap-1.5 rounded-[3px] border border-accent/30 bg-accent/10 px-2 py-0.5 font-mono text-[10px] text-accent">
-          <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+        <span className="inline-flex items-center gap-1 rounded-[3px] border border-accent/30 bg-accent/10 px-2 py-0.5 font-mono text-[10px] text-accent">
+          <Loader2 className="h-2.5 w-2.5 animate-spin text-accent" strokeWidth={2} />
           fetching
         </span>
       );
     case 'failed':
       return (
-        <span className="inline-flex items-center gap-1.5 rounded-[3px] border border-red-500/30 bg-red-500/10 px-2 py-0.5 font-mono text-[10px] text-red-400">
-          <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
+        <span className="inline-flex items-center gap-1 rounded-[3px] border border-red-500/30 bg-red-500/10 px-2 py-0.5 font-mono text-[10px] text-red-400">
+          <AlertCircle className="h-2.5 w-2.5 text-red-400" strokeWidth={2} />
           failed
         </span>
       );
@@ -206,3 +212,4 @@ function StatusBadge({ status }: { status: DbAnalysis['status'] }) {
       return null;
   }
 }
+

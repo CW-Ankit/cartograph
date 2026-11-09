@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { OrganizationSwitcher, UserButton } from '@clerk/nextjs';
-import { ThemeToggle } from './theme-toggle';
+import { OrganizationSwitcher } from '@neondatabase/auth-ui';
+import { UserProfileMenu } from './auth/user-profile-menu';
 import { InviteModal } from './invite-modal';
 import { Dashboard } from './dashboard';
 import { LeftRail } from './canvas/left-rail';
@@ -56,9 +56,6 @@ export function Shell({
           <div className="flex items-center gap-1.5 font-mono text-xs font-semibold tracking-tight">
             <span className="text-accent text-sm leading-none">◈</span>
             <span className="text-foreground tracking-tight">cartograph</span>
-            <span className="rounded-[3px] border border-border bg-surface-raised px-1 py-0.2 text-[9px] font-mono text-foreground-muted">
-              v0.1.0
-            </span>
           </div>
 
           <span className="text-border text-xs">/</span>
@@ -71,51 +68,23 @@ export function Shell({
               </span>
             </div>
           ) : (
-            /* The Single Organization Button: Clerk's native OrganizationSwitcher */
-            <div id="server-rendered-org" className="flex items-center">
-              <OrganizationSwitcher
-                hidePersonal={true}
-                afterSelectOrganizationUrl="/"
-                afterCreateOrganizationUrl="/"
-                afterLeaveOrganizationUrl="/"
-                appearance={{
-                  elements: {
-                    rootBox: 'font-mono text-xs flex items-center',
-                    organizationSwitcherTrigger:
-                      'h-7 rounded-[4px] border border-border bg-surface hover:bg-surface-raised px-2.5 py-0 font-mono text-xs text-foreground hover:border-accent transition-all duration-100 flex items-center gap-2 focus:ring-0 focus:outline-none shadow-none',
-                    organizationPreview: 'gap-1.5 flex items-center text-foreground',
-                    organizationPreviewTextContainer: 'text-foreground font-mono text-xs font-medium',
-                    organizationPreviewMainIdentifier: 'text-foreground font-mono text-xs font-medium',
-                    organizationPreviewAvatarBox: 'w-4 h-4 rounded-[3px] border border-border overflow-hidden',
-                    organizationSwitcherTriggerIcon: 'text-foreground-muted h-3.5 w-3.5 opacity-80',
-                  },
-                }}
-              />
+            /* The Single Organization Button: Better Auth OrganizationSwitcher */
+            <div id="server-rendered-org" className="flex items-center font-mono text-xs">
+              <OrganizationSwitcher hidePersonal={true} />
             </div>
           )}
         </div>
 
-        {/* Right: Actions, Theme Toggle, User Profile */}
+        {/* Right: Actions & User Profile Menu (with embedded theme toggle) */}
         <div className="flex items-center gap-2">
           {!isScaffoldPreview && organization && (
             <InviteModal orgName={organization.name} />
           )}
 
-          {/* Theme Switcher */}
-          <ThemeToggle />
-
-          {/* Clerk User Button (when authenticated) */}
+          {/* Profile Menu with integrated theme settings */}
           {!isScaffoldPreview && (
             <div className="ml-1 flex items-center">
-              <UserButton
-                appearance={{
-                  elements: {
-                    userButtonTrigger:
-                      'h-7 w-7 rounded-[4px] border border-border bg-surface hover:border-accent transition-colors p-0.5',
-                    avatarBox: 'h-full w-full rounded-[2px]',
-                  },
-                }}
-              />
+              <UserProfileMenu />
             </div>
           )}
         </div>

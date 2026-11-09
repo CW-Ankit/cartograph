@@ -70,6 +70,15 @@ export function RightPane({
     onTabChange?.(tab);
   };
 
+  // Toggle file selection: clicking an active file deselects it back to repository overview
+  const handleToggleSelectFile = (fileId: string) => {
+    if (selectedTarget?.type === 'file' && selectedTarget.id === fileId) {
+      onSelectTarget?.(null);
+    } else {
+      onSelectTarget?.({ type: 'file', id: fileId });
+    }
+  };
+
   // Safe fallbacks if no parseResult loaded yet
   const files = useMemo(() => parseResult?.files ?? [], [parseResult]);
   const edges = useMemo(() => parseResult?.edges ?? [], [parseResult]);
@@ -319,7 +328,7 @@ export function RightPane({
                       <button
                         type="button"
                         key={targetPath}
-                        onClick={() => onSelectTarget?.({ type: 'file', id: targetPath })}
+                        onClick={() => handleToggleSelectFile(targetPath)}
                         onMouseEnter={() => onHoverTarget?.({ type: 'file', id: targetPath })}
                         onMouseLeave={() => onHoverTarget?.(null)}
                         className={`w-full text-left flex items-center justify-between px-2 py-1.5 text-xs transition-colors cursor-pointer group ${
@@ -364,7 +373,7 @@ export function RightPane({
                       <button
                         type="button"
                         key={sourcePath}
-                        onClick={() => onSelectTarget?.({ type: 'file', id: sourcePath })}
+                        onClick={() => handleToggleSelectFile(sourcePath)}
                         onMouseEnter={() => onHoverTarget?.({ type: 'file', id: sourcePath })}
                         onMouseLeave={() => onHoverTarget?.(null)}
                         className={`w-full text-left flex items-center justify-between px-2 py-1.5 text-xs transition-colors cursor-pointer group ${
@@ -479,7 +488,7 @@ export function RightPane({
                     <button
                       type="button"
                       key={file.id}
-                      onClick={() => onSelectTarget?.({ type: 'file', id: file.id })}
+                      onClick={() => handleToggleSelectFile(file.id)}
                       onMouseEnter={() => onHoverTarget?.({ type: 'file', id: file.id })}
                       onMouseLeave={() => onHoverTarget?.(null)}
                       className={`w-full text-left flex items-center justify-between px-2 py-1.5 text-xs transition-colors cursor-pointer group ${
@@ -567,7 +576,7 @@ export function RightPane({
                     <button
                       type="button"
                       key={file.id}
-                      onClick={() => onSelectTarget?.({ type: 'file', id: file.id })}
+                      onClick={() => handleToggleSelectFile(file.id)}
                       onMouseEnter={() => onHoverTarget?.({ type: 'file', id: file.id })}
                       onMouseLeave={() => onHoverTarget?.(null)}
                       className={`w-full text-left flex items-center justify-between px-2 py-1.5 text-xs transition-colors cursor-pointer group ${
@@ -605,7 +614,7 @@ export function RightPane({
                     <button
                       type="button"
                       key={file.id}
-                      onClick={() => onSelectTarget?.({ type: 'file', id: file.id })}
+                      onClick={() => handleToggleSelectFile(file.id)}
                       onMouseEnter={() => onHoverTarget?.({ type: 'file', id: file.id })}
                       onMouseLeave={() => onHoverTarget?.(null)}
                       className={`w-full text-left flex items-center justify-between px-2 py-1.5 text-xs transition-colors cursor-pointer group ${

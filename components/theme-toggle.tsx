@@ -1,6 +1,7 @@
 'use client';
 
 import { useSyncExternalStore } from 'react';
+import { Monitor, Sun, Moon } from 'lucide-react';
 
 type ThemePreference = 'system' | 'light' | 'dark';
 
@@ -102,23 +103,26 @@ function getServerSnapshot(): ThemePreference {
   return 'system';
 }
 
-export function ThemeToggle() {
+export function ThemeToggle({ fullWidth = false }: { fullWidth?: boolean }) {
   const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-  const options: Array<{ id: ThemePreference; label: string }> = [
-    { id: 'system', label: 'system' },
-    { id: 'light', label: 'light' },
-    { id: 'dark', label: 'dark' },
+  const options: Array<{ id: ThemePreference; label: string; icon: typeof Monitor }> = [
+    { id: 'system', label: 'system', icon: Monitor },
+    { id: 'light', label: 'light', icon: Sun },
+    { id: 'dark', label: 'dark', icon: Moon },
   ];
 
   return (
     <div
       role="radiogroup"
       aria-label="Theme selection"
-      className="h-7 inline-flex items-center rounded-[4px] border border-border bg-surface p-0.5 font-mono text-[10px]"
+      className={`h-7 inline-flex items-center rounded-[4px] border border-border bg-surface-raised/40 p-0.5 font-mono text-[10px] ${
+        fullWidth ? 'w-full grid grid-cols-3 gap-0.5' : ''
+      }`}
     >
       {options.map((opt) => {
         const active = theme === opt.id;
+        const Icon = opt.icon;
         return (
           <button
             key={opt.id}
@@ -126,16 +130,19 @@ export function ThemeToggle() {
             role="radio"
             aria-checked={active}
             onClick={() => updateThemeInDom(opt.id)}
-            className={`h-full rounded-[2px] px-2 transition-all duration-100 uppercase tracking-wider text-[9px] ${
+            className={`h-full flex items-center justify-center gap-1.5 rounded-[2px] px-2 transition-all duration-100 uppercase tracking-wider text-[9px] ${
               active
                 ? 'bg-accent font-semibold text-accent-foreground shadow-xs'
-                : 'text-foreground-muted hover:text-foreground hover:bg-surface-raised'
+                : 'text-foreground-muted hover:text-foreground hover:bg-surface'
             }`}
           >
-            {opt.label}
+            <Icon className="h-3 w-3 shrink-0" strokeWidth={1.75} />
+            <span>{opt.label}</span>
           </button>
         );
       })}
     </div>
   );
 }
+
+

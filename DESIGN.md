@@ -49,7 +49,7 @@ Everything else—surfaces, borders, body copy, breadcrumbs—is greyscale.
 
 ### Fonts
 
-- **UI Sans**: `Geist Sans`, `-apple-system`, `BlinkMacSystemFont`, `sans-serif`. Used for natural language labels and panel names.
+- **UI Sans**: `Ubuntu`, `-apple-system`, `BlinkMacSystemFont`, `sans-serif`. Used for natural language labels and panel names.
 - **Code Mono**: `Geist Mono`, `ui-monospace`, `monospace`. Used for **all** file paths, symbols, branch names, dimensions, numbers, metrics, and command prompts.
 
 ### Micro-Typography Conventions
@@ -72,10 +72,10 @@ All top bar interactive elements—the Organization Switcher, the Invite button,
 className="h-7 inline-flex items-center gap-1.5 rounded-[4px] border border-border bg-surface px-2.5 py-0 font-mono text-xs text-foreground transition-all duration-100 hover:bg-surface-raised hover:border-accent"
 ```
 
-### 2. Clerk Components (Organization Switcher & User Button)
+### 2. Neon Auth Components (Organization Switcher & User Profile)
 
-- **Only one organization control**: Never duplicate the organization name as static text alongside Clerk's switcher. The switcher sits in the breadcrumb (`cartograph / [OrganizationSwitcher]`).
-- **Styling overrides**: Clerk's default internal stylesheets use hardcoded black text (`#131316`) on triggers. Always style Clerk triggers and popovers through `app/globals.css` mapping `.cl-organizationSwitcherTrigger *` and popover cards directly to `var(--foreground)` and `var(--surface)`.
+- **Only one organization control**: Never duplicate the organization name as static text alongside the organization switcher. The switcher sits in the breadcrumb (`cartograph / [OrganizationSwitcher]`).
+- **Styling overrides**: Better Auth components use hairline borders (`--neon-radius: 4px`), monospace labels, and direct CSS variable mapping to `var(--surface)`, `var(--foreground)`, and `var(--border)` via `app/globals.css`. Trigger buttons are styled at `#server-rendered-org button` with height 28px (`h-7`).
 
 ### 3. Canvas & Graph Elements (Going forward into Phase 2+)
 
